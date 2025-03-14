@@ -1,3 +1,4 @@
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
@@ -18,3 +19,9 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Create tables if they don’t exist
+def init_db():
+    from app.models.destination import Destination  # Import your models
+    from app.models.user import User
+    Base.metadata.create_all(bind=engine)
