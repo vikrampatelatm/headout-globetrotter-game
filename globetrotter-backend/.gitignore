@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.iml
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs and databases
+*.log
+db.sqlite3
+
+# Environment variables
+.env
+.env.*
+
+# Docker
+*.pid
+*.sock
+
+# FastAPI specific
+*.db
+*.sqlite3
+
+# Migrations
+migrations/
+
+# Pytest
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Git
+*.swp
+*.swo
+*.bak
