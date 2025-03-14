@@ -1,7 +1,7 @@
 from fastapi import FastAPI
+from app.routes import destination, user
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to The Globetrotter API!"}
+app.include_router(destination.router)
+app.include_router(user.router)
