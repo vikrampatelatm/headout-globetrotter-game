@@ -10,16 +10,6 @@ import random
 
 router = APIRouter(prefix="/destinations", tags=["Destinations"])
 
-# Retrieve a random destination
-@router.get("/random-destination", response_model=DestinationResponse)
-def fetch_random_destination(db: Session = Depends(get_db)):
-    destination = db.query(Destination).order_by(func.random()).first()
-    if not destination:
-        raise HTTPException(status_code=404, detail="No destinations available")
-    return {
-        "status": "success",
-        "data": destination
-    }
 
 # Start a new game round with a random destination and multiple-choice options
 @router.get("/game-question")
