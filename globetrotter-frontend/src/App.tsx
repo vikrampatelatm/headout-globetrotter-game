@@ -1,12 +1,14 @@
 import './App.css'
+import AppRoutes from "./routes";
+import { GameProvider } from "./context/GameContext";
 
-function App() {
-  
+const App = () => {
   return (
-    <>
-      <h3 className='text-3xl font-bold underline'>vikram</h3>
-    </>
-  )
-}
+    <GameProvider>
+      <AppRoutes />
+    </GameProvider>
+  );
+};
 
-export default App
+export default App;
+

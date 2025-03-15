@@ -3,8 +3,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from app.database import get_db
 from app.models.destination import Destination
+from app.models.destination import AnswerRequest
 from app.schemas.destination import DestinationCreate, DestinationResponse
 import random
+
 
 router = APIRouter(prefix="/destinations", tags=["Destinations"])
 
@@ -54,14 +56,18 @@ def bulk_insert_destinations(data: list[DestinationCreate], db: Session = Depend
 
 # Verify user answer for a game question
 @router.post("/verify-answer")
-def verify_answer(question_id: int, user_answer: str, db: Session = Depends(get_db)):
-    question = db.query(Destination).filter(Destination.id == question_id).first()
+def verify_answer(request: AnswerRequest, db: Session = Depends(get_db)):
+    question = db.query(Destination).filter(Destination.id == request.question_id).first()
+    
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
 
-    is_correct = question.city.lower() == user_answer.lower()
+    is_correct = question.city.strip().lower() == request.user_answer.strip().lower()
+    
+    # Pick a random fun fact or a default message if incorrect
+    fun_fact = random.choice(question.fun_fact) 
+
     return {
-        "status": "success" if is_correct else "failure",
         "is_correct": is_correct,
-        "fun_fact": question.fun_fact if is_correct else "Nice try! Better luck next time!"
+        "fun_fact": fun_fact
     }
