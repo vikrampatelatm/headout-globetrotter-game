@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from "react";
 import { fetchGameQuestion, verifyAnswer } from "../services/gameService";
 import { GameContext } from "../context/GameContext";
-import { motion } from "framer-motion"; // 🎉 Animations
-import Confetti from "react-confetti"; // 🎊 Confetti effect
-import useWindowSize from "react-use/lib/useWindowSize"; // To adjust confetti size
+import { motion } from "framer-motion";
+import Confetti from "react-confetti";
+import useWindowSize from "react-use/lib/useWindowSize";
+import ChallengeFriend from "../components/ChallengeFriend";
 
 export interface Question {
   question_id: number;
@@ -12,16 +13,16 @@ export interface Question {
 }
 
 const Game = () => {
-  const { width, height } = useWindowSize(); // Get screen size for confetti
-  const { score, incrementScore, resetGame } = useContext(GameContext)!;
+  const { width, height } = useWindowSize();
+  const { score, incrementScore } = useContext(GameContext)!;
   const [question, setQuestion] = useState<Question | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [funFact, setFunFact] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState<boolean>(false); // Disable submit after click
-  const [showConfetti, setShowConfetti] = useState<boolean>(false); // 🎊 Confetti trigger
+  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [showConfetti, setShowConfetti] = useState<boolean>(false);
 
   useEffect(() => {
     loadNewQuestion();
@@ -33,8 +34,8 @@ const Game = () => {
     setFeedback(null);
     setFunFact(null);
     setSelectedAnswer(null);
-    setSubmitted(false); // Re-enable submit button
-    setShowConfetti(false); // Reset confetti effect
+    setSubmitted(false);
+    setShowConfetti(false);
 
     try {
       const data = await fetchGameQuestion();
@@ -49,16 +50,22 @@ const Game = () => {
 
   const handleSubmit = async () => {
     if (!question || !selectedAnswer || submitted) return;
-    setSubmitted(true); // Disable submit button after click
-
+    setSubmitted(true);
+  
     try {
       const result = await verifyAnswer(question.question_id, selectedAnswer);
       setFunFact(result.fun_fact);
-      
+  
       if (result.is_correct) {
         setFeedback("🎉 Correct!");
-        setShowConfetti(true); // 🎊 Trigger confetti
+        setShowConfetti(true);
         incrementScore();
+  
+        // Stop confetti after 3 seconds
+        setTimeout(() => {
+          setShowConfetti(false);
+        }, 10000);
+        
       } else {
         setFeedback("😢 Wrong! Try again.");
       }
@@ -67,88 +74,101 @@ const Game = () => {
       setFeedback("⚠️ Something went wrong. Please try again.");
     }
   };
-
-  const handlePlayAgain = () => {
-    resetGame(); // Reset score to 0
-    loadNewQuestion(); // Start fresh with a new question
-  };
-
+  
   return (
-    <div className="flex flex-col items-center p-6">
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-
-      {/* 🎊 Show Confetti when the user is correct */}
+    <div className="relative flex flex-col items-center justify-center h-screen w-full bg-[#f5f0e8] text-black p-8">
       {showConfetti && <Confetti width={width} height={height} />}
 
-      {/* 🏆 Show Score */}
-      <p className="text-xl font-bold mb-4">Score: {score}</p>
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="absolute top-6 text-4xl font-extrabold text-orange-500"
+      >
+        The Globetrotter Challenge
+      </motion.h1>
 
-      {question && (
-        <div className="p-6 border rounded shadow-lg bg-white text-center">
-          <p className="text-lg font-bold">{question.clue}</p> {/* Display Clue */}
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            {question.options.map((option) => (
-              <motion.button
-                key={option}
-                whileTap={{ scale: 0.95 }} // Button animation
-                className={`px-4 py-2 border rounded transition ${
-                  selectedAnswer === option ? "bg-blue-500 text-white" : "bg-gray-200"
-                }`}
-                onClick={() => setSelectedAnswer(option)}
-              >
-                {option}
-              </motion.button>
-            ))}
-          </div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="absolute top-20 bg-white px-6 py-2 text-2xl font-bold rounded-full shadow-lg border border-gray-300"
+      >
+        Score: <span className="text-green-600">{score}</span>
+      </motion.div>
 
-          <button
-            onClick={handleSubmit}
-            className="mt-4 px-6 py-2 bg-green-500 text-white rounded transition disabled:bg-gray-400"
-            disabled={!selectedAnswer || submitted} // Disable after clicking
+      <div className="flex-grow mb-5 flex justify-center items-center w-full">
+        {loading && <p className="text-lg font-medium">Loading...</p>}
+        {error && <p className="text-red-500">{error}</p>}
+
+        {question && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-8 max-w-xl bg-white text-black rounded-2xl shadow-lg text-center border border-gray-300"
           >
-            Submit Answer
-          </button>
+            <p className="text-3xl font-bold mb-6">{question.clue}</p>
 
-          {/* 🎭 Feedback Section */}
-          {feedback && (
-            <motion.p
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mt-2 text-lg font-semibold"
+            <div className="grid grid-cols-2 gap-4">
+              {question.options.map((option) => (
+                <motion.button
+                  key={option}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelectedAnswer(option)}
+                  className={`p-4 rounded-xl text-lg font-medium shadow-md border-2 border-black transition-all ${
+                    selectedAnswer === option
+                      ? "bg-green-400 text-white"
+                      : "bg-white hover:bg-gray-200"
+                  }`}
+                >
+                  {option}
+                </motion.button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              className="mt-6 px-8 py-3 bg-orange-500 text-white text-lg font-semibold rounded-xl transition hover:bg-orange-600 disabled:bg-gray-400 shadow-md border-2 border-black"
+              disabled={!selectedAnswer || submitted}
             >
-              {feedback}
-            </motion.p>
-          )}
+              Submit Answer
+            </button>
 
-          {/* 🧠 Fun Fact Display */}
-          {funFact && (
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-2 italic text-gray-700"
-            >
-              🧠 Fun Fact: {funFact}
-            </motion.p>
-          )}
-        </div>
-      )}
+            {feedback && (
+              <motion.p
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-4 text-xl font-bold"
+              >
+                {feedback}
+              </motion.p>
+            )}
 
-      {/* 🎮 Next Question Button (Continue Playing) */}
-      <button
-        onClick={loadNewQuestion}
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded transition"
-      >
-        Next ➡️
-      </button>
+            {funFact && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-4 bg-yellow-100 text-gray-800 rounded-lg shadow-md border border-yellow-300"
+              >
+                <p className="text-lg font-semibold">Fun Fact:</p>
+                <p className="italic text-md">{funFact}</p>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+      </div>
 
-      {/* 🔄 Play Again Button (Reset Game) */}
-      <button
-        onClick={handlePlayAgain}
-        className="mt-2 px-4 py-2 bg-red-500 text-white rounded transition"
-      >
-        Play Again 🔄
-      </button>
+      <div className="absolute bottom-12 flex justify-center items-center space-x-6">
+        <button className="p-3 px-6 bg-orange-500 text-white shadow-md border-2 border-black rounded-xl text-lg transition hover:bg-orange-600">
+          Play Again
+        </button>
+        <button
+          onClick={loadNewQuestion}
+          className="p-3 px-6 bg-orange-500 text-white shadow-md border-2 border-black rounded-xl text-lg transition hover:bg-orange-600"
+        >
+          Next Question
+        </button>
+        <ChallengeFriend/>
+      </div>
     </div>
   );
 };

@@ -16,3 +16,11 @@ class DestinationResponse(DestinationBase):
 
     class Config:
         orm_mode = True
+
+
+class AnswerRequest(BaseModel):
+    question_id: int
+    user_answer: str
+
+
+

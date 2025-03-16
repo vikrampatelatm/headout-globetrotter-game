@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from app.database import get_db
 from app.models.destination import Destination
-from app.models.destination import AnswerRequest
-from app.schemas.destination import DestinationCreate, DestinationResponse
+from app.schemas.destination import AnswerRequest
+from app.schemas.destination import DestinationCreate
 import random
 
 
